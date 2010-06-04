@@ -10,12 +10,13 @@ use warnings;
 use Any::Moose;
 use Carp;
 use File::Temp;
+use Term::EditorEdit::Edit;
 
 sub EDITOR {
     return $ENV{VISUAL} || $ENV{EDITOR};
 }
 
-sub _edit_file {
+sub edit_file {
     my $self = shift;
     my $file = shift;
     die "Missing editor" unless my $editor = $self->EDITOR;
@@ -43,25 +44,20 @@ sub edit {
     $content = '' unless defined $content;
 
     my $tmp = $self->tmp;
-    $tmp->print( $content );
-    $tmp->autoflush( 1 );
-    $self->_edit_file( $tmp->filename );
-    $tmp->seek( 0, 0 ) or die "Unable to seek on tmp ($tmp): $!";
 
-    {
-        local $/;
-        $content = <$tmp>;
-    }
+    my $edit = Term::EditorEdit::Edit->new(
+        editor => $self,
+        process => $given{process},
+        tmp => $tmp,
+        document => $content,
+    ); 
 
-    return $content unless $given{process};
-
-    return $content unless $given{process};
-
-    
-    
+    return $edit->edit;
 }
 
 sub tmp { return File::Temp->new( unlink => 1 ) }
+
+1;
 
 __END__
 
