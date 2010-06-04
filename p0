@@ -1,0 +1,45 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Term::EditorEdit;
+
+Term::EditorEdit->edit(
+    process => sub {
+        my $edit = shift;
+
+        $edit->document;
+
+        if ( ... ) {
+            $edit->content( ... )
+            $edit->retry( '...' );
+        }
+
+        if ( $edit->prompt_Yn( '...' ) ) {
+            
+        }
+        else {
+        }
+
+        if ( $edit->prompt( '...', undef, '...', process => { ... }, filter => sub { ... } ) ) {
+
+        if ( $edit->first_line_is_blank ) {
+            while( 1 ) {
+                my $choice = $edit->prompt(
+                    "Interrupt, first line of the document is blank\n" .
+                    "Do you want to edit again or quit? [E/q] ", undef, "edit" );
+                if      ( $edit->choice_like( $choice, 'edit' ) ) { last } 
+                elsif   ( $edit->choice_like( $choice, 'quit' ) ) { exit 0 } 
+                else    { $edit->say( "Invalid choice ($choice)" ) }
+            }
+        }
+
+        return "";
+    },
+    content => <<_END_ );
+# Blah, blah, blah
+# Durp Durp
+---
+
+_END_
