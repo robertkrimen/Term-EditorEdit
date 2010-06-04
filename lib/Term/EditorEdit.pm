@@ -16,6 +16,11 @@ sub EDITOR {
     return $ENV{VISUAL} || $ENV{EDITOR};
 }
 
+our $__singleton__;
+sub __singleton__ {
+    return $__singleton__ ||=__PACKAGE__->new;
+}
+
 sub edit_file {
     my $self = shift;
     my $file = shift;
@@ -32,6 +37,7 @@ sub edit_file {
 
 sub edit {
     my $self = shift;
+    $self = $self->__singleton__ unless blessed $self;
     my %given;
     if ( ref $_[0] eq 'HASH' ) { %given = %{ &shift } }
     else {
