@@ -1,7 +1,41 @@
 package Term::EditorEdit;
+# ABSTRACT: Edit a document via an $EDITOR
 
-# document, content
-# header, header_separator
+=head1 SYNOPSIS
+
+    use Term::EditorEdit;
+    
+    # $VISUAL or $EDITOR is invoked
+    $document = Term::EditorEdit->edit( document => <<_END_ );
+    Apple
+    Banana
+    Cherry
+    _END_
+
+With post-processing:
+
+    $document = Term::EditorEdit->edit( document => $document, process => sub {
+        my $edit = shift;
+        my $document = $edit->document;
+        if ( document_is_invalid ) {
+            # The argument to retry inserted at the top of the document
+            # The retry method will return immediately
+            $edit->retry( "# Hey user, fix it!" )
+        }
+        # Whatever is returned from the processor will be returned via ->edit
+        return $document;
+    } )
+    Apple
+    Banana
+    Cherry
+    _END_
+    
+=cut
+
+# Retry should not take an argument... or...
+
+# ->retry( premable => ... )
+# ->retry( print => ... )
 # prompt_Yn, prompt_yN
 
 use strict;
@@ -38,120 +72,24 @@ sub edit_file {
 sub edit {
     my $self = shift;
     $self = $self->__singleton__ unless blessed $self;
-    my %given;
-    if ( ref $_[0] eq 'HASH' ) { %given = %{ &shift } }
-    else {
-        $given{content} = pop;
-        $given{process} = shift if @_ && ref $_[0] eq 'CODE';
-    }
-    carp "Ignoring remaining arguments: @_" if @_;
+    my %given = @_;
+    # carp "Ignoring remaining arguments: @_" if @_;
 
-    my $content = $given{content};
-    $content = '' unless defined $content;
+    my $document = delete $given{document};
+    $document = '' unless defined $document;
 
     my $tmp = $self->tmp;
 
     my $edit = Term::EditorEdit::Edit->new(
         editor => $self,
-        process => $given{process},
         tmp => $tmp,
-        document => $content,
+        document => $document,
+        %given, # process, split, ...
     ); 
 
     return $edit->edit;
 }
 
 sub tmp { return File::Temp->new( unlink => 1 ) }
-
-1;
-
-__END__
-
-use Path::Class qw/ dir /;
-use String::Util qw/ :all /;
-use File::Temp;
-use Text::Split;
-
-sub file {
-    return File::Temp->new;
-}
-
-sub _edit_file {
-    my $file = shift;
-    die "Don't know what editor" unless my $editor = _editor;
-    my $rc = system @$editor, $file;
-    unless ( $rc == 0 ) {
-        my ($exit_value, $signal, $core_dump);
-        $exit_value = $? >> 8;
-        $signal = $? & 127;
-        $core_dump = $? & 128;
-        die "Error during edit (@$editor): exit value($exit_value), signal($signal), core_dump($core_dump): $!";
-    }
-}
-
-sub edit {
-    my $self = shift;
-    my %given;
-    if ( ref $_[0] eq 'HASH' ) { %given = %{ $_[0] } }
-    else {
-        my $content = pop;
-        my ( @header ) = @_;
-        @given{qw/ content header /} = ( $content, \@header );
-    }
-
-    my ( $content ) = map { defined $_ ? $_ : ''  } @given{qw/ content /};
-    my $header = $given{header} || [];
-    $header = [ map { split m/\n+/, $_ } @$header ];
-
-#    my @signature = ( time, ( $operation ? $operation : () ) );
-#
-#    $workfl = $workdr->file( join '.', 'data', @signature );
-#    $workfl->openw->print(
-#        join "\n",
-#        ( map { join ' ', '#', $_ } "> $operation", @$header),
-#        $content,
-#    );
-
-    my $file = $self->file
-    $file->print(
-        join "\n",
-        ( map { join ' ', '#', $_ } @$header ),
-        $content,
-    );
-
-EDIT:
-    while ( 1 ) {
-
-        _edit_file $file;
-
-        my ( $gt, @header, @content );
-        
-        @content = $workfl->slurp;
-
-        unless ( $content[0] =~ m/\S/ ) {
-            while ( 1 ) {
-                print "Do you want to re-edit or abort? [E/a] ";
-                my $input = <STDIN>;
-                if ( $input =~ m/^\s*e(?:d(?:i(?:t)?)?)?\s*$/i ) {
-                    next EDIT;
-                }
-                elsif ( $input =~ m/^\s*a(?:b(?:o(?:r(?:t)?)?)?)?\s*$/i ) {
-                    exit 0;
-                }
-            }
-        }
-
-        my $content = join '', @content;
-        my $split = Text::Split->new( data => $content );
-        if ( $split = $split->find( qr/^[ \t]*(?!#)/m ) ) {
-            @header = $split->slurp( '[]/' );
-            $content = $split->remaining;
-        }
-        if ( $header[0] ) {
-            ( $gt ) = $header[0] =~ m/\s*#\s*([\w\-\?\>]+)/;
-        }
-        return $content;
-    }
-}
 
 1;

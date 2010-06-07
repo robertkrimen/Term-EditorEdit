@@ -7,13 +7,14 @@ use Any::Moose;
 use Text::Clip;
 use Try::Tiny;
 
+our $EDITOR = 'Term::EditorEdit';
 our $RETRY = "__Term_EditorEdit_retry__\n";
-our $SEPARATOR = '---';
 
-has editor => qw/ is ro required 1 weak_ref 1 /;
+#has editor => qw/ is ro required 1 weak_ref 1 /;
 has tmp => qw/ is ro required 1 /;
 has document => qw/ is rw isa Str required 1 /;
 has process => qw/ is ro isa Maybe[CodeRef] /;
+has split => qw/ accessor separator /;
 
 has [qw/ preamble preamble0 /] => qw/ is rw isa Maybe[Str] /;
 has [qw/ content content0 /] => qw/ is rw isa Str /;
@@ -37,9 +38,9 @@ sub edit {
     while ( 1 ) {
         $tmp->seek( 0, 0 ) or die "Unable to seek on tmp ($tmp): $!";
         $tmp->truncate( 0 ) or die "Unable to truncate on tmp ($tmp): $!";
-        $tmp->print( $self->combine( $self->preamble, $self->content ) );
+        $tmp->print( $self->join( $self->preamble, $self->content ) );
 
-        $self->editor->edit_file( $tmp->filename );
+        $EDITOR->edit_file( $tmp->filename );
 
         $tmp->seek( 0, 0 ) or die "Unable to seek on tmp ($tmp): $!";
         my $document = join '', <$tmp>;
@@ -79,7 +80,7 @@ sub retry {
     if ( defined $_[0] ) {
         my $preamble = $_[0];
         chomp $preamble;
-        $self->preamble( join "\n", $preamble, $self->preamble0 );
+        $self->preamble( join "\n", $preamble, map { defined $_ ? $_ : '' } $self->preamble0 );
     }
     die $RETRY;
 }
@@ -88,21 +89,27 @@ sub split {
     my $self = shift;
     my $document = shift;
 
-    if ( my $mark = Text::Clip->new( data => $document )->find( qr/^\s*$SEPARATOR\s*$/m ) ) {
+    return ( undef, $document ) unless my $separator = $self->separator;
+
+    die "Invalid separator ($separator)" if ref $separator;
+
+    if ( my $mark = Text::Clip->new( data => $document )->find( qr/^\s*$separator\s*$/m ) ) {
         return ( $mark->preceding, $mark->remaining );
     }
 
     return ( undef, $document );
 }
 
-sub combine {
+sub join {
     my $self = shift;
     my $preamble = shift;
     my $content = shift;
 
     return $content unless defined $preamble;
+
     chomp $preamble;
-    return join "\n", $preamble, $SEPARATOR, $content;
+    return join "\n", $preamble, $content unless my $separator = $self->separator;
+    return join "\n", $preamble, $separator, $content;
 }
 
 1;
