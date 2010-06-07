@@ -17,25 +17,61 @@ With post-processing:
     $document = Term::EditorEdit->edit( document => $document, process => sub {
         my $edit = shift;
         my $document = $edit->document;
-        if ( document_is_invalid ) {
-            # The argument to retry inserted at the top of the document
-            # The retry method will return immediately
-            $edit->retry( "# Hey user, fix it!" )
+        if ( document_is_invalid() ) {
+            # The retry method will return out of ->process immediately (via die)
+            $edit->retry
         }
         # Whatever is returned from the processor will be returned via ->edit
         return $document;
-    } )
+    } );
+
+With an "out-of-band" instructional preamble:
+    
+    $document = <<_END_
+    # Delete everything but the fruit you like:
+    ---
     Apple
     Banana
     Cherry
     _END_
-    
+
+    # After the edit, only the text following the first '---' will be returned
+    $content = Term::EditorEdit->edit(
+        separator => '---',
+        document => $document,
+    );
+
+=head1 DESCRIPTION
+
+Term::EditorEdit is a tool for prompting the user to edit a piece of text via C<$VISUAL> or C<$EDITOR> and return the result
+
+In addition to just editing a document, this module can distinguish between a document preamble and document content, giving you a way to provide "out-of-bound" information to whoever is editing. Once an edit is complete, only the content (whatever was below the preamble) is returned
+
+=head1 USAGE
+
+=head2 $result = Term::EditorEdit->edit( ... )
+
+Takes the following parameters:
+
+    document            The document to edit. (required)
+
+    separator           The string to use as a line separator dividing
+                        content from the preamble
+
+    process             A code reference that will be called once an edit is complete.
+                        Within process, you can check the document, preamble, and content.
+                        You can also have the user retry the edit. Whatever is returned
+                        from the code will be what is returned from the ->edit call.
+
+Returns the edited document (or content if a separator was specified) or the result of
+the C<process> argument (if supplied)
+
+=head1 SEE ALSO
+
+L<Term::CallEditor>
+
 =cut
 
-# Retry should not take an argument... or...
-
-# ->retry( premable => ... )
-# ->retry( print => ... )
 # prompt_Yn, prompt_yN
 
 use strict;

@@ -7,6 +7,11 @@ use Dzpl
     copyright => 'Robert Krimen',
 
     require => q/
+        Any::Moose
+        Text::Clip
+        Try::Tiny
+        File::Temp
+
         [Test]
         Test::Most
     /,
