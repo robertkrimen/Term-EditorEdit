@@ -11,22 +11,32 @@ our $EDITOR = 'Term::EditorEdit';
 our $RETRY = "__Term_EditorEdit_retry__\n";
 
 #has editor => qw/ is ro required 1 weak_ref 1 /;
-has tmp => qw/ is ro required 1 /;
-has document => qw/ is rw isa Str required 1 /;
 has process => qw/ is ro isa Maybe[CodeRef] /;
-has split => qw/ accessor separator /;
+has separator => qw/ is rw /;
+has tmp => qw/ is ro required 1 /;
 
-has [qw/ preamble preamble0 /] => qw/ is rw isa Maybe[Str] /;
-has [qw/ content content0 /] => qw/ is rw isa Str /;
+has document => qw/ is rw isa Str required 1 /;
+has $_ => reader => $_, writer => "_$_", isa => 'Str' for qw/ initial_document /;
+
+has preamble => qw/ is rw isa Maybe[Str] /;
+has $_ => reader => $_, writer => "_$_", isa => 'Maybe[Str]' for qw/ initial_preamble /;
+
+has content => qw/ is rw isa Str /;
+has $_ => reader => $_, writer => "_$_", isa => 'Str' for qw/ initial_content /;
 
 sub BUILD {
     my $self = shift;
 
-    my ( $preamble, $content ) = $self->split( $self->document );
+    my $document = $self->document;
+    $self->_initial_document( $document );
+
+    my ( $preamble, $content ) = $self->split( $document );
+
     $self->preamble( $preamble );
-    $self->preamble0( $preamble );
+    $self->_initial_preamble( $preamble );
+
     $self->content( $content );
-    $self->content0( $content );
+    $self->_initial_content( $content );
 }
 
 sub edit {
@@ -75,13 +85,19 @@ sub first_line_blank {
 }
 sub line0_blank { return $_[0]->first_line_blank }
 
+sub preamble_from_initial {
+    my $self = shift;
+    my @preamble;
+    for my $part ( "$_[0]", $self->initial_preamble ) {
+        next unless defined $part;
+        chomp $part;
+        push @preamble, $part;
+    }
+    $self->preamble( join "\n", @preamble, '' ) if @preamble;
+}
+
 sub retry {
     my $self = shift;
-    if ( defined $_[0] ) {
-        my $preamble = $_[0];
-        chomp $preamble;
-        $self->preamble( join "\n", $preamble, map { defined $_ ? $_ : '' } $self->preamble0 );
-    }
     die $RETRY;
 }
 
