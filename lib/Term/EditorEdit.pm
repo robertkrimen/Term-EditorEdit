@@ -53,7 +53,7 @@ In addition to just editing a document, this module can distinguish between a do
 
 Takes the following parameters:
 
-    document            The document to edit. (required)
+    document            The document to edit (required)
 
     separator           The string to use as a line separator dividing
                         content from the preamble
@@ -61,7 +61,7 @@ Takes the following parameters:
     process             A code reference that will be called once an edit is complete.
                         Within process, you can check the document, preamble, and content.
                         You can also have the user retry the edit. Whatever is returned
-                        from the code will be what is returned from the ->edit call.
+                        from the code will be what is returned from the ->edit call
 
 Returns the edited document (or content if a separator was specified) or the result of
 the C<process> argument (if supplied)
