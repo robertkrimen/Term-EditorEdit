@@ -41,3 +41,17 @@ $edit->preamble_from_initial( "Xyzzy\n # Apple, Banana\n\n" );
 is( $edit->preamble, "Xyzzy\n # Apple, Banana\n\n1\n # 2\n 3\n" );
 
 throws_ok( sub { $edit->retry }, qr/^\s*__Term_EditorEdit_retry__\s*$/ );
+
+$document = <<_END_;
+---
+A
+B
+C
+_END_
+
+is( $edit->join( $edit->split( $document ) ), <<_END_ )
+---
+A
+B
+C
+_END_

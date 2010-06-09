@@ -122,9 +122,14 @@ sub join {
     my $content = shift;
 
     return $content unless defined $preamble;
-
     chomp $preamble;
-    return join "\n", $preamble, $content unless my $separator = $self->separator;
+
+    my $separator = $self->separator;
+    unless ( defined $separator ) {
+        return $content unless length $preamble;
+        return join "\n", $preamble, $content;
+    }
+    return join "\n", $separator, $content unless length $preamble;
     return join "\n", $preamble, $separator, $content;
 }
 
