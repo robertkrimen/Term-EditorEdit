@@ -1,8 +1,8 @@
 NAME
-    Term::EditorEdit - Edit a document via an $EDITOR
+    Term::EditorEdit - Edit a document via $EDITOR
 
 VERSION
-    version 0.0010
+    version 0.0011
 
 SYNOPSIS
         use Term::EditorEdit;
