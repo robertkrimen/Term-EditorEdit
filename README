@@ -2,12 +2,12 @@ NAME
     Term::EditorEdit - Edit a document via $EDITOR
 
 VERSION
-    version 0.0011
+    version 0.0012
 
 SYNOPSIS
         use Term::EditorEdit;
-    
-        # $VISUAL or $EDITOR is invoked
+        
+    # $VISUAL or $EDITOR is invoked
         $document = Term::EditorEdit->edit( document => <<_END_ );
         Apple
         Banana
@@ -74,7 +74,7 @@ SEE ALSO
     Term::CallEditor
 
 AUTHOR
-      Robert Krimen <robertkrimen@gmail.com>
+    Robert Krimen <robertkrimen@gmail.com>
 
 COPYRIGHT AND LICENSE
     This software is copyright (c) 2010 by Robert Krimen.

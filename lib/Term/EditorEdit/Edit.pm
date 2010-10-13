@@ -9,6 +9,7 @@ use Try::Tiny;
 
 our $EDITOR = 'Term::EditorEdit';
 our $RETRY = "__Term_EditorEdit_retry__\n";
+our $Test_edit;
 
 #has editor => qw/ is ro required 1 weak_ref 1 /;
 has process => qw/ is ro isa Maybe[CodeRef] /;
@@ -50,10 +51,25 @@ sub edit {
         $tmp->truncate( 0 ) or die "Unable to truncate on tmp ($tmp): $!";
         $tmp->print( $self->join( $self->preamble, $self->content ) );
 
-        $EDITOR->edit_file( $tmp->filename );
+        if ( $Test_edit ) {
+            $Test_edit->( $tmp );
+        }
+        else {
+            $EDITOR->edit_file( $tmp->filename );
+        }
 
-        $tmp->seek( 0, 0 ) or die "Unable to seek on tmp ($tmp): $!";
-        my $document = join '', <$tmp>;
+        my $document;
+        if ( 1 ) { # I think this is safer?
+            my $tmpr = IO::File->new( $tmp->filename, 'r' );
+            $document = join '', <$tmpr>;
+            $tmpr->close;
+            undef $tmpr;
+        }
+        else {
+            $tmp->seek( 0, 0 ) or die "Unable to seek on tmp ($tmp): $!";
+            $document = join '', <$tmp>;
+        }
+
         $self->document( $document );
         my ( $preamble, $content ) = $self->split( $document );
         $self->preamble( $preamble );
