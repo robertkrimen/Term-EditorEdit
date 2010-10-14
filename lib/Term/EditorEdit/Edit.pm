@@ -6,6 +6,7 @@ use warnings;
 use Any::Moose;
 use Text::Clip;
 use Try::Tiny;
+use IO::File;
 
 our $EDITOR = 'Term::EditorEdit';
 our $RETRY = "__Term_EditorEdit_retry__\n";
@@ -60,7 +61,8 @@ sub edit {
 
         my $document;
         if ( 1 ) { # I think this is safer?
-            my $tmpr = IO::File->new( $tmp->filename, 'r' );
+            my $filename = $tmp->filename;
+            my $tmpr = IO::File->new( $filename, 'r' ) or die "Unable to open ($filename): $!";
             $document = join '', <$tmpr>;
             $tmpr->close;
             undef $tmpr;
