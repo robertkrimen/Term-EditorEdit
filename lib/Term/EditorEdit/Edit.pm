@@ -15,7 +15,7 @@ our $Test_edit;
 #has editor => qw/ is ro required 1 weak_ref 1 /;
 has process => qw/ is ro isa Maybe[CodeRef] /;
 has separator => qw/ is rw /;
-has tmp => qw/ is ro required 1 /;
+has file => qw/ is ro required 1 /;
 
 has document => qw/ is rw isa Str required 1 /;
 has $_ => reader => $_, writer => "_$_", isa => 'Str' for qw/ initial_document /;
@@ -44,7 +44,31 @@ sub BUILD {
 sub edit {
     my $self = shift;
 
-    my $tmp = $self->tmp;
+    my $file = $self->file;
+    my $tmp;
+    if ( blessed $file ) {
+        if ( $file->isa( 'IO::Handle' ) ) {
+            $tmp = $file;
+        }
+        elsif ( $file->isa( 'Path::Class::File' ) ) {
+            $tmp = $file->open( 'w' ) or die "Unable to open $file: $!";
+        }
+        else {
+            die "Invalid file: $file";
+        }
+    }
+    else {
+        $file = '' unless defined $file;
+        if ( ref $file ) {
+            die "Invalid file: $file";
+        }
+        elsif ( length $file ) {
+            $tmp = IO::File->new( $file, 'w' ) or die "Unable to open $file: $!";
+        }
+        else {
+            die "Missing file";
+        }
+    }
     $tmp->autoflush( 1 );
     
     while ( 1 ) {

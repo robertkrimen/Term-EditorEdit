@@ -17,7 +17,7 @@ c
  D
 _END_
 
-$edit = Term::EditorEdit::Edit->new( tmp => 0, document => $document );
+$edit = Term::EditorEdit::Edit->new( file => 0, document => $document );
 
 is( $edit->document, $document ); 
 is( $edit->content, $document );
