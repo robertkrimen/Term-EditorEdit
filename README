@@ -2,7 +2,7 @@ NAME
     Term::EditorEdit - Edit a document via $EDITOR
 
 VERSION
-    version 0.0014
+    version 0.0015
 
 SYNOPSIS
         use Term::EditorEdit;
@@ -53,12 +53,6 @@ DESCRIPTION
     is complete, only the content (whatever was below the preamble) is
     returned
 
-NAME
-    Term::EditorEdit - Edit a document via $EDITOR
-
-VERSION
-    version 0.0014
-
 USAGE
   $result = Term::EditorEdit->edit( ... )
     Takes the following parameters:
@@ -78,15 +72,6 @@ USAGE
 
 SEE ALSO
     Term::CallEditor
-
-AUTHOR
-    Robert Krimen <robertkrimen@gmail.com>
-
-COPYRIGHT AND LICENSE
-    This software is copyright (c) 2010 by Robert Krimen.
-
-    This is free software; you can redistribute it and/or modify it under
-    the same terms as the Perl 5 programming language system itself.
 
 AUTHOR
     Robert Krimen <robertkrimen@gmail.com>

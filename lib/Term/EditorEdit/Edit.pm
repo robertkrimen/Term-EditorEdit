@@ -80,20 +80,53 @@ sub edit {
             $Test_edit->( $tmp );
         }
         else {
-            $EDITOR->edit_file( $tmp->filename );
+            try {
+                    $EDITOR->edit_file( $tmp->filename );
+            }
+            catch {
+                my $error = $_[0];
+                warn "There was an error editing ", $tmp->filename, "\n";
+                while ( 1 ) {
+                    print STDERR "Do you want to continue, abort, or save? [cas] ";
+                    my $input = <STDIN>;
+                    chomp $input;
+                    die $error unless defined $input;
+                    if ( 0 ) { }
+                    elsif ( $input eq 'c' ) {
+                        last;
+                    }
+                    elsif ( $input eq 'a' ) {
+                        die $error;
+                    }
+                    elsif ( $input eq 's' ) {
+                        my $save;
+                        unless ( $save = File::Temp->new( dir => '.', template => 'TermEditorEdit.XXXXXX', unlink => 0 ) ) {
+                            warn "Unable to create temporary file: $!" and next;
+                        }
+                        my $tmp_filename = $tmp->filename;
+                        my $tmpr;
+                        unless ( $tmpr = IO::File->new( $tmp_filename, 'r' ) ) {
+                            warn "Unable to open ($tmp_filename): $!" and next;
+                        }
+                        $save->print( join '', <$tmpr> );
+                        $save->close;
+                        warn "Saved to: ", $save->filename, " ", ( -s $save->filename ), "\n";
+                    }
+                    else {
+                        warn "I don't understand ($input)\n";
+                    }
+                }
+
+            };
         }
 
         my $document;
-        if ( 1 ) { # I think this is safer?
+        {
             my $filename = $tmp->filename;
             my $tmpr = IO::File->new( $filename, 'r' ) or die "Unable to open ($filename): $!";
             $document = join '', <$tmpr>;
             $tmpr->close;
             undef $tmpr;
-        }
-        else {
-            $tmp->seek( 0, 0 ) or die "Unable to seek on tmp ($tmp): $!";
-            $document = join '', <$tmp>;
         }
 
         $self->document( $document );

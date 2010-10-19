@@ -1,6 +1,9 @@
 TODO:
     - Test for edit-on-file-swap
 
+0.0015 Tuesday October 19 14:04:46 PDT 2010:
+    - Added graceful recovery on editor exception
+
 0.0014 Monday October 18 10:17:29 PDT 2010:
     - Added file => support
 
