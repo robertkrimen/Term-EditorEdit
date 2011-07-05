@@ -1,5 +1,5 @@
 package Term::EditorEdit;
-# ABSTRACT: Edit a document via $EDITOR
+# ABSTRACT: Edit a document via $VISUAL/$EDITOR
 
 =head1 SYNOPSIS
 

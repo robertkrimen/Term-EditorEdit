@@ -1,5 +1,5 @@
 NAME
-    Term::EditorEdit - Edit a document via $EDITOR
+    Term::EditorEdit - Edit a document via $VISUAL/$EDITOR
 
 VERSION
     version 0.0016
