@@ -85,9 +85,10 @@ sub edit {
             }
             catch {
                 my $error = $_[0];
-                warn "There was an error editing ", $tmp->filename, "\n";
+                warn "$error";
+                warn "*** There was an error editing ", $tmp->filename, "\n";
                 while ( 1 ) {
-                    print STDERR "Do you want to continue, abort, or save? [cas] ";
+                    print STDERR "Do you want to (c)ontinue, (a)bort, or (s)ave? ";
                     my $input = <STDIN>;
                     chomp $input;
                     die $error unless defined $input;

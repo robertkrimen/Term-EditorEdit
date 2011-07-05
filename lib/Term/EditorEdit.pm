@@ -94,7 +94,7 @@ sub __singleton__ {
 sub edit_file {
     my $self = shift;
     my $file = shift;
-    die "Missing editor" unless my $editor = $self->EDITOR;
+    die "*** Missing editor (No \$VISUAL or \$EDITOR)\n" unless my $editor = $self->EDITOR;
     my $rc = system $editor, $file;
     unless ( $rc == 0 ) {
         my ($exit_value, $signal, $core_dump);

@@ -1,6 +1,9 @@
 TODO:
     - Test for edit-on-file-swap
 
+0.0016 Tuesday July 05 09:40:55 PDT 2011:
+    - Added better error reporting
+
 0.0015 Tuesday October 19 14:04:46 PDT 2010:
     - Added graceful recovery on editor exception
 
