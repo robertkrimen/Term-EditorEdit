@@ -4,7 +4,7 @@ package Term::EditorEdit;
 =head1 SYNOPSIS
 
     use Term::EditorEdit;
-    
+
     # $VISUAL or $EDITOR is invoked
     $document = Term::EditorEdit->edit( document => <<_END_ );
     Apple
@@ -26,7 +26,7 @@ With post-processing:
     } );
 
 With an "out-of-band" instructional preamble:
-    
+
     $document = <<_END_
     # Delete everything but the fruit you like:
     ---
@@ -77,9 +77,10 @@ L<Term::CallEditor>
 use strict;
 use warnings;
 
-use Any::Moose;
 use Carp;
 use File::Temp;
+use Moo;
+use MooX::late;
 use Term::EditorEdit::Edit;
 
 sub EDITOR {
@@ -122,7 +123,7 @@ sub edit {
         file => $file,
         document => $document,
         %given, # process, split, ...
-    ); 
+    );
 
     return $edit->edit;
 }

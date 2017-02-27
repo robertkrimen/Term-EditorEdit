@@ -3,7 +3,8 @@ package Term::EditorEdit::Edit;
 use strict;
 use warnings;
 
-use Any::Moose;
+use Moo;
+use MooX::late;
 use Text::Clip;
 use Try::Tiny;
 use IO::File;
@@ -18,13 +19,13 @@ has separator => qw/ is rw /;
 has file => qw/ is ro required 1 /;
 
 has document => qw/ is rw isa Str required 1 /;
-has $_ => reader => $_, writer => "_$_", isa => 'Str' for qw/ initial_document /;
+has $_ => reader => $_, writer => "_$_", is => 'rw', isa => 'Str' for qw/ initial_document /;
 
 has preamble => qw/ is rw isa Maybe[Str] /;
-has $_ => reader => $_, writer => "_$_", isa => 'Maybe[Str]' for qw/ initial_preamble /;
+has $_ => reader => $_, writer => "_$_", is => 'rw', isa => 'Maybe[Str]' for qw/ initial_preamble /;
 
 has content => qw/ is rw isa Str /;
-has $_ => reader => $_, writer => "_$_", isa => 'Str' for qw/ initial_content /;
+has $_ => reader => $_, writer => "_$_", is => 'rw', isa => 'Str' for qw/ initial_content /;
 
 sub BUILD {
     my $self = shift;
@@ -70,7 +71,7 @@ sub edit {
         }
     }
     $tmp->autoflush( 1 );
-    
+
     while ( 1 ) {
         $tmp->seek( 0, 0 ) or die "Unable to seek on tmp ($tmp): $!";
         $tmp->truncate( 0 ) or die "Unable to truncate on tmp ($tmp): $!";
@@ -152,7 +153,7 @@ sub edit {
 
         return $content;
     }
-    
+
 }
 
 sub first_line_blank {
